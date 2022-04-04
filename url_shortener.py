@@ -1,6 +1,4 @@
 from flask import Flask, jsonify, request, redirect
-from flask_sqlalchemy import SQLAlchemy
-import os
 import string
 from datetime import datetime
 from random import choices
