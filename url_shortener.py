@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 import os
 import string
+import sqlite3
 
 # setup configs
 app = Flask(__name__)
@@ -26,14 +27,42 @@ def home_page():
 # todo: fix this 
 @app.route('/encode',methods=['POST'])
 def encode_url():
-    url = request.json['url']
-    sqlconnection = sqlite3.connect("urls.db")
+
+    # ensure uniqueness
+    def generate_short(cursor):
+        short = ''.join(choices(chars,k=4))
+        exist = cursor.execute("select short_url from urls where short_url = {}".format(short), (short_url,)).fetchone()
+        if exist:
+            generate_short(cursor)
+        else:
+            return short
+
+    url = str(request.json['url'])
+    print("URL+++++++++++++++++++")
+    print("URL IS: ", url)
+    sqlconnection = sqlite3.connect("database.db")
+    cursor = sqlconnection.cursor()
     chars = string.digits + string.ascii_letters
-    short = ''.join(choices(chars,k=4))
+    # check if url exists already
+    exist = cursor.execute("SELECT * from URLS where original_url={}".format(url))
+    print("EXISTS: ",  exist)
+
+    if exist:
+        short = exist
+    else:
+        short = generate_short(cursor)
+        cursor.execute("INSERT INTO urls(original_url,short_url) VALUES ('{}', '{}')".format(url, short))
+        sqlconnection.commit()
+
+
+    created_at = cursor.execute("SELECT created from urls where short_url={}".format(short)).fetchone()
+    sqlconnection.close()
+
+    shortened_url = request.host_url + short
     data = {
         'url': url,
-        'shortened': 'blah blah',
-        'date created': 'blah blah'
+        'shortened': shortened_url,
+        'date created': created_at
     }
     return jsonify(data)
 # @app.route('decode', )
@@ -48,7 +77,6 @@ def decode_url():
     }
     return jsonify(data)
 @app.route('/short/')
-def open_url():
 
 
 @app.route('/stored_urls', methods=['GET'])
