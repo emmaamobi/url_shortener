@@ -7,7 +7,7 @@
 ## How to run
 - Install the requirements from the requirements.txt: `pip install -r requirements.txt`
 - start up the server: `python -m flask run`
-- select any API testing application which can be used to test HTTP requests
+- select any API testing application which can be used to test HTTP requests(e.g POSTMAN)
 - to encode a url, make a POST request to '/encode'. The request body should contain a JSON object in the format {"url": "<website_url>"}
 	- After encoding, a JSON object will be returned. clicking on the "shortened", or pasting the shortened url in your web browser will redirect to the original url
 - to decode a url, make a POST request to '/decode'. The request body should contain a JSON object in the format {"url": "<website_url>"}
